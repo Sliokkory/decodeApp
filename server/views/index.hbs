@@ -1,5 +1,63 @@
-<form action="/" method="post" enctype="multipart/form-data">
-  <h3>Upload file to decode</h3>
-  <input type="file" name="sampleFile" accept="text/*" />
-  <input type="submit" class="btn btn-primary" />
-</form>
+<script>
+  function download() {
+    var download = document.getElementById("download");
+    var image = document.getElementById("myCanvas").toDataURL("image/png")
+      .replace("image/png", "image/octet-stream");
+    download.setAttribute("href", image);
+    //download.setAttribute("download","archive.png");
+  }
+</script>
+
+<div class="card">
+  <form action="/" method="post" enctype="multipart/form-data">
+    <h3>Upload file to decode</h3>
+    <input type="file" name="sampleFile" accept="text/*" />
+    <input type="submit" class="btn btn-primary" />
+  </form>
+</div>
+
+<div class="card">
+  <canvas id="myCanvas" width="{{width}}" height="{{height}}" style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.</canvas>
+  <script>
+    var canvas = document.getElementById("canvas");
+    let colors = new Array();
+    let pixelColors = ("{{colors}}"); //I get data from the server about colors from a file
+    colors = pixelColors.split(","); //I will convert it to an array, since the input is a string
+
+    //transform the array into two-dimensional with dimensions equal to width by height
+    function array_chunk(input, size) {
+      for (var x, i = 0, c = -1, l = input.length, n = []; i < l; i++) {
+        (x = i % size) ? n[c][x] = input[i] : n[++c] = [input[i]];
+      }
+      return n;
+    }
+    let resultColors = array_chunk(colors, {{ width }});
+
+    //I start building the canvas
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+
+    var barH = 1  // size of a single cell (pixel)
+
+    var crX, crY
+
+
+    for (var i = 0; i < {{ width }}; i++) {
+      for (var j = 0; j < {{ height }}; j++) {
+      ctx.beginPath();
+      crX = i * barH;
+      crY = j * barH;
+      ctx.rect(crX, crY, barH, barH);
+      ctx.fillStyle = "#" + resultColors[i][j]; //I paint with the color obtained from the array of colors (converted earlier) and add # to this value (since the color is hex)
+      ctx.fill();
+    }
+    }
+  </script>
+</div>
+
+<div class="card">
+  <a id="download" download="picture.png">
+    <button type="button" class="btn btn-primary" onClick="download()">Download</button>
+  </a>
+</div>
