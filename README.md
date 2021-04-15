@@ -1,0 +1,2 @@
+# decodeApp
+npm start
